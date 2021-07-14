@@ -1,0 +1,4 @@
+.DS_Store
+/env_files
+/logs
+/env_files/credentials.env

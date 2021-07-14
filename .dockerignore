@@ -1,0 +1,8 @@
+.DS_Store
+/env_files
+/logs
+/env_files/base.env
+/env_files/credentials.env
+/env_files/crpc.env
+/env_files/rpe.env
+/env_files/tasklist.env
