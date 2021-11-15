@@ -217,14 +217,13 @@ def main():
 
                 try:
                     sendEmail(smtpServer, emailToSend)
+                    logging.info("Sent message containing {} items to {}".format(numberOfItems, receiverEmailAddress))
                 except Exception as error:
                     logging.info("The following error occurred: " + str(error))
 
             elif environment == 'development':
                 print(emailHTML)
                 print('\n')
-
-            logging.info("Sent message containing {} items to {}".format(numberOfItems, receiverEmailAddress))
 
 if __name__ == "__main__":
     main()
