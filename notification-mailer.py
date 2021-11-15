@@ -41,11 +41,11 @@ def composeEmailMessage(css, emailTableHeader, columns, emailContent, emailFoote
 
     return html
 
-def composeEmail(smtpEmail, receiverEmailAddress, ccEmail, emailSubject, html):
+def composeEmail(smtpEmail, receiverEmailAddress, ccEmail, emailSubject, htmlContent):
 
     emailToSend = EmailMessage()
     emailToSend['From'] = smtpEmail
-    emailToSend['To'] = 'cshannon@ufl.edu' #receiverEmailAddress
+    emailToSend['To'] = receiverEmailAddress
     emailToSend['Cc'] = ccEmail
     emailToSend['Subject'] = emailSubject
     emailToSend.add_alternative(htmlContent, subtype ='html')
@@ -214,7 +214,12 @@ def main():
 
             if environment == 'production':
                 emailToSend = composeEmail(smtpEmail, receiverEmailAddress, ccEmail, emailSubject, emailHTML)
-                sendEmail(smtpServer, emailToSend)
+
+                try:
+                    sendEmail(smtpServer, emailToSend)
+                except Exception as error:
+                    logging.info("The following error occurred: " + str(error))
+
             elif environment == 'development':
                 print(emailHTML)
                 print('\n')
