@@ -89,8 +89,6 @@ def getTableColumns(query, connection):
 
             columns.append(queryDescription[column][0])
 
-            print(queryDescription[column][1])
-
         return columns
 
     except cx_Oracle.DatabaseError as e:
@@ -196,6 +194,9 @@ def main():
 
     if connection:
 
+        failedEmailContent = {}
+        failedEmailAddressCount = 0
+
         logging.info("Setting the current schema to {}".format(oracleCurrentSchema))
         connection.current_schema = oracleCurrentSchema
 
@@ -219,11 +220,30 @@ def main():
                     sendEmail(smtpServer, emailToSend)
                     logging.info("Sent message containing {} items to {}".format(numberOfItems, receiverEmailAddress))
                 except Exception as error:
+                    failedEmailContent[failedEmailAddressCount] = {"Failed_Email_Addresses": receiverEmailAddress}
+                    failedEmailAddressCount = failedEmailAddressCount + 1
                     logging.info("The following error occurred: " + str(error))
 
             elif environment == 'development':
                 print(emailHTML)
                 print('\n')
+
+        if len(failedEmailContent) > 0:
+            logging.info("Sending an Email to the Designated Staff to Inform them of Email Send Failures")
+            emailFailureSubject = "Failure to Send: " + emailSubject
+            emailFailureTableHeader = "There were issues sending " + emailTableHeader.replace(':', '') + " to the following Email Addresses:"
+            emailFailureColumns = ["Failed_Email_Addresses"]
+            emailFailureFooter = "Please Ensure the Attached Emails are Valid"
+
+            emailFailureHTML = composeEmailMessage(css, emailFailureTableHeader, emailFailureColumns, failedEmailContent, emailFailureFooter)
+            emailFailureToSend = composeEmail(smtpEmail, smtpEmail, '', emailFailureSubject, emailFailureHTML)
+
+            try:
+                sendEmail(smtpServer, emailFailureToSend)
+                logging.info("The Notification for Failed Emails has been sent")
+            except Exception as error:
+                logging.info("The following error occurred: " + str(error))
+
 
 if __name__ == "__main__":
     main()
