@@ -46,7 +46,10 @@ def composeEmail(smtpEmail, receiverEmailAddress, ccEmail, emailSubject, htmlCon
     emailToSend = EmailMessage()
     emailToSend['From'] = smtpEmail
     emailToSend['To'] = receiverEmailAddress
-    emailToSend['Cc'] = ccEmail
+
+    if ccEmail:
+        emailToSend['Cc'] = ccEmail
+
     emailToSend['Subject'] = emailSubject
     emailToSend.add_alternative(htmlContent, subtype ='html')
 
