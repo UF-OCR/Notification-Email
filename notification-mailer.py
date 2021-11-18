@@ -195,7 +195,9 @@ def main():
     if connection:
 
         failedEmailContent = {}
-        failedEmailAddressCount = 0
+        successfulEmailCount = 0
+        failedEmailCount = 0
+        developmentNumberOfEmails = 0
 
         logging.info("Setting the current schema to {}".format(oracleCurrentSchema))
         connection.current_schema = oracleCurrentSchema
@@ -218,17 +220,19 @@ def main():
 
                 try:
                     sendEmail(smtpServer, emailToSend)
+                    successfulEmailCount = successfulEmailCount + 1
                     logging.info("Sent message containing {} items to {}".format(numberOfItems, receiverEmailAddress))
                 except Exception as error:
-                    failedEmailContent[failedEmailAddressCount] = {"Failed_Email_Addresses": receiverEmailAddress}
-                    failedEmailAddressCount = failedEmailAddressCount + 1
+                    failedEmailContent[failedEmailCount] = {"Failed_Email_Addresses": receiverEmailAddress}
+                    failedEmailCount = failedEmailCount + 1
                     logging.info("The following error occurred: " + str(error))
 
             elif environment == 'development':
+                developmentNumberOfEmails = developmentNumberOfEmails + 1
                 print(emailHTML)
                 print('\n')
 
-        if len(failedEmailContent) > 0:
+        if failedEmailCount > 0:
             logging.info("Sending an Email to the Designated Staff to Inform them of Email Send Failures")
             emailFailureSubject = "Failure to Send: " + emailSubject
             emailFailureTableHeader = "There were issues sending " + emailTableHeader.replace(':', '') + " to the following Email Addresses:"
@@ -244,6 +248,10 @@ def main():
             except Exception as error:
                 logging.info("The following error occurred: " + str(error))
 
+        if environment == 'production':
+            logging.info("The application successfully sent {} emails, {} emails failed to send".format(successfulEmailCount, failedEmailCount))
+        elif environment == 'development':
+            logging.info("The application found {} email addresses, the application would have sent {} emails in the Production environment".format(len(emailAddresses), developmentNumberOfEmails))
 
 if __name__ == "__main__":
     main()
