@@ -132,9 +132,14 @@ def getTableContents(query, connection, columns, userProvidedEmailAddress, sqlEm
                 queryRow = (dict(zip(columns, row)))
 
                 if userProvidedEmailAddress:
+                    # If the email is already in the dictionary then append the task to the existing tasklist
+                    if userProvidedEmailAddress in emailContent.keys():
+                        emailContent[userProvidedEmailAddress].append(queryRow)
 
-                    emailContent[userProvidedEmailAddress] = [queryRow]
-                    emailAddresses.add(userProvidedEmailAddress)
+                    # If the email is not in the dictionary then add the email to the dictionary with the task as its value
+                    else:
+                        emailContent[userProvidedEmailAddress] = [queryRow]
+                        emailAddresses.add(userProvidedEmailAddress)
 
                 elif queryRow[sqlEmailRow] is not None:
 
@@ -144,15 +149,12 @@ def getTableContents(query, connection, columns, userProvidedEmailAddress, sqlEm
 
                         # If the email is already in the dictionary then append the task to the existing tasklist
                         if email in emailContent.keys():
-
                             emailContent[email].append(queryRow)
 
                         # If the email is not in the dictionary then add the email to the dictionary with the task as its value
                         else:
-
                             emailContent[email] = [queryRow]
-
-                        emailAddresses.add(email)
+                            emailAddresses.add(email)
 
         return emailAddresses, emailContent
 
