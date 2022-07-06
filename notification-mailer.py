@@ -166,6 +166,16 @@ def getTableContents(query, connection, columns, userProvidedEmailAddress, sqlEm
             logging.info("Closing the get table contents cursor")
             cursor.close()
 
+def getQueryFromFile(filename):
+
+    sqlfile = open(filename, 'r')
+
+    query = sqlfile.read()
+
+    sqlfile.close()
+
+    return query
+
 
 def main():
 
@@ -173,7 +183,7 @@ def main():
 
     css = os.getenv('TABLE_CSS')
 
-    query = os.getenv('QUERY')
+    sqlFileName = os.getenv('SQL_FILE_NAME')
     userRequestedColumns = os.getenv('TABLE_COLUMNS').split(',')
 
     oracleServer = os.getenv('ORACLE_SERVER')
@@ -194,6 +204,8 @@ def main():
     emailFooter = os.getenv('EMAIL_FOOTER')
 
     environment = os.getenv('ENVIRONMENT').lower()
+
+    query = getQueryFromFile(sqlFileName)
 
     connection = connectToDatabase(oracleServer, oraclePort, oracleSID, oracleUsername, oraclePassword, oracleTnsName)
 
