@@ -4,7 +4,7 @@ import cx_Oracle
 import smtplib
 from email.message import EmailMessage
 
-def composeEmailMessage(css, emailTableHeader, columns, emailContent, emailFooter):
+def composeEmailMessage(css, emailTableHeader, columns, emailContent, emailFooter, highlightColumn, colorColumn):
 
     html = "<html>"
 
@@ -28,7 +28,11 @@ def composeEmailMessage(css, emailTableHeader, columns, emailContent, emailFoote
 
         for column in columns:
 
-            html += "<td>{}</td>".format(emailContent[task][column])
+            # Runs if the user has specified a column that will be hightlighted. If a column is to be highlighted it will used the sql queries colorColumn that will need to be specified by the user.
+            if highlightColumn and column == highlightColumn:
+                html += "<td bgcolor={}>{}</td>".format(emailContent[task][colorColumn], emailContent[task][column])
+            else:
+                html += "<td>{}</td>".format(emailContent[task][column])
 
         html += "</tr>"
 
@@ -201,6 +205,8 @@ def main():
     ccEmail = os.getenv('EMAIL_CC')
     emailSubject = os.getenv('EMAIL_SUBJECT')
     emailTableHeader = os.getenv('EMAIL_TABLE_HEADER')
+    highlightColumn = os.getenv('COLUMN_TO_HIGHLIGHT')
+    colorColumn = os.getenv('COLOR_COLUMN')
     emailFooter = os.getenv('EMAIL_FOOTER')
 
     environment = os.getenv('ENVIRONMENT').lower()
@@ -230,7 +236,7 @@ def main():
             numberOfItems = len(emailContent[receiverEmailAddress])
 
             logging.info("Composing message for {}".format(receiverEmailAddress))
-            emailHTML = composeEmailMessage(css, emailTableHeader, userRequestedColumns, emailContent[receiverEmailAddress], emailFooter)
+            emailHTML = composeEmailMessage(css, emailTableHeader, userRequestedColumns, emailContent[receiverEmailAddress], emailFooter, highlightColumn, colorColumn)
 
             if environment == 'production':
                 emailToSend = composeEmail(smtpEmail, receiverEmailAddress, ccEmail, emailSubject, emailHTML)
